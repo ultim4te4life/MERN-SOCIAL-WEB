@@ -39,9 +39,28 @@ export const authSlice = createSlice({
       });
       state.posts = updatedPosts;
     },
+    setComment: (state, action) => {
+      const { postId, comment } = action.payload;
+      const updatedPosts = state.posts.map((post) => {
+        if (post._id === postId) {
+          // Add the new comment to the comments array
+          post.comments.push(comment);
+        }
+        return post;
+      });
+      state.posts = updatedPosts;
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost } =
-  authSlice.actions;
+export const {
+  setMode,
+  setLogin,
+  setLogout,
+  setFriends,
+  setPosts,
+  setPost,
+  setComment, // New action for adding comments
+} = authSlice.actions;
+
 export default authSlice.reducer;

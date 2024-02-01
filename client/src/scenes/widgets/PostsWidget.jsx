@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPosts } from "state";
+import { setPosts, setComment } from "state"; // Import the new action setComment
 import PostWidget from "./PostWidget";
 
 const PostsWidget = ({ userId, isProfile = false }) => {
@@ -37,6 +37,24 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleCommentSubmit = async (postId, commentText) => {
+    const response = await fetch(
+      `http://localhost:3001/posts/${postId}/comments`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ comment: commentText }),
+      }
+    );
+    const newComment = await response.json();
+
+    // Dispatch the setComment action to update the Redux state with the new comment
+    dispatch(setComment({ postId, comment: newComment.comment }));
+  };
+
   return (
     <>
       {posts.map(
@@ -63,6 +81,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
             userPicturePath={userPicturePath}
             likes={likes}
             comments={comments}
+            onCommentSubmit={handleCommentSubmit} // Pass the comment submit handler
           />
         )
       )}

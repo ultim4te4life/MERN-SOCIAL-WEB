@@ -71,3 +71,29 @@ export const likePost = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
+
+export const addCommentToPost = async (req, res) => {
+  const { postId } = req.params;
+  const { firstName, lastName, text } = req.body;
+
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const newComment = {
+      firstName,
+      lastName,
+      text,
+    };
+
+    post.comments.push(newComment);
+    await post.save();
+
+    res.status(201).json(post);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};

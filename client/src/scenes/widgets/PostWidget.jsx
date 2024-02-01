@@ -3,14 +3,22 @@ import {
   FavoriteBorderOutlined,
   FavoriteOutlined,
   ShareOutlined,
+  SendOutlined,
 } from "@mui/icons-material";
-import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Divider,
+  IconButton,
+  Typography,
+  TextField,
+  useTheme,
+} from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPost } from "state";
+import { setPost, setComment } from "state";
 
 const PostWidget = ({
   postId,
@@ -24,8 +32,10 @@ const PostWidget = ({
   comments,
 }) => {
   const [isComments, setIsComments] = useState(false);
+  const [commentText, setCommentText] = useState(""); // State to manage comment input
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user);
   const loggedInUserId = useSelector((state) => state.user._id);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
@@ -45,6 +55,32 @@ const PostWidget = ({
     });
     const updatedPost = await response.json();
     dispatch(setPost({ post: updatedPost }));
+  };
+
+  const handleCommentSubmit = async () => {
+    const response = await fetch(
+      `http://localhost:3001/posts/${postId}/comments`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: commentText,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }),
+      }
+    );
+
+    const newComment = await response.json();
+
+    // Dispatch an action to update the Redux state with the new comment
+    dispatch(setComment({ postId, comment: newComment }));
+
+    // Clear the comment input field
+    setCommentText("");
   };
 
   return (
@@ -98,10 +134,21 @@ const PostWidget = ({
             <Box key={`${name}-${i}`}>
               <Divider />
               <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
-                {comment}
+                {comment.firstName} {comment.lastName}
               </Typography>
+              <Typography>{comment.text}</Typography>
             </Box>
           ))}
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Add a comment..."
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+          />
+          <IconButton onClick={handleCommentSubmit}>
+            <SendOutlined />
+          </IconButton>
           <Divider />
         </Box>
       )}

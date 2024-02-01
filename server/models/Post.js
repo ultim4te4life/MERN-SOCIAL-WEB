@@ -1,3 +1,4 @@
+// models/Post.js
 import mongoose from "mongoose";
 
 const postSchema = mongoose.Schema(
@@ -22,10 +23,14 @@ const postSchema = mongoose.Schema(
       type: Map,
       of: Boolean,
     },
-    comments: {
-      type: Array,
-      default: [],
-    },
+    comments: [
+      {
+        firstName: { type: String },
+        lastName: { type: String },
+
+        text: { type: String, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );

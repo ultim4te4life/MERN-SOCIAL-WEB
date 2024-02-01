@@ -226,14 +226,7 @@ export const posts = [
       [userIds[6], true],
       [userIds[3], true],
     ]),
-    comments: [
-      "I lied again, one more random comment",
-      "Why am I doing this?",
-      "I'm bored",
-      "I'm still bored",
-      "All I want to do is play video games",
-      "I'm going to play video games",
-    ],
+    comments: [],
   },
   {
     _id: new mongoose.Types.ObjectId(),
