@@ -32,7 +32,7 @@ const PostWidget = ({
   comments,
 }) => {
   const [isComments, setIsComments] = useState(false);
-  const [commentText, setCommentText] = useState(""); // State to manage comment input
+  const [commentText, setCommentText] = useState("");
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const user = useSelector((state) => state.user);
@@ -131,12 +131,11 @@ const PostWidget = ({
       {isComments && (
         <Box mt="0.5rem">
           {comments.map((comment, i) => (
-            <Box key={`${name}-${i}`}>
+            <Box key={`${name}-${i}`} sx={{ marginBottom: "0.5rem" }}>
               <Divider />
-              <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
-                {comment.firstName} {comment.lastName}
+              <Typography sx={{ color: main, m: "0.5rem 0" }}>
+                {`${comment.firstName} ${comment.lastName}:`} {comment.text}
               </Typography>
-              <Typography>{comment.text}</Typography>
             </Box>
           ))}
           <TextField

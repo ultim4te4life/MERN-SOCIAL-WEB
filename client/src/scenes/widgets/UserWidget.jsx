@@ -1,6 +1,8 @@
+// Assuming you're using React
+import React, { useState, useEffect } from "react";
 import {
-  ManageAccountsOutlined,
   EditOutlined,
+  SaveOutlined,
   LocationOnOutlined,
   WorkOutlineOutlined,
 } from "@mui/icons-material";
@@ -9,11 +11,11 @@ import UserImage from "components/UserImage";
 import FlexBetween from "components/FlexBetween";
 import WidgetWrapper from "components/WidgetWrapper";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const UserWidget = ({ userId, picturePath }) => {
   const [user, setUser] = useState(null);
+  const [editMode, setEditMode] = useState(false);
   const { palette } = useTheme();
   const navigate = useNavigate();
   const token = useSelector((state) => state.token);
@@ -22,17 +24,57 @@ const UserWidget = ({ userId, picturePath }) => {
   const main = palette.neutral.main;
 
   const getUser = async () => {
-    const response = await fetch(`http://localhost:3001/users/${userId}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    setUser(data);
+    try {
+      const response = await fetch(`http://localhost:3001/users/${userId}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      setUser(data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const updateUser = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/users/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          location: user.location,
+          occupation: user.occupation,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error updating user data:", errorData.message);
+        return;
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      setEditMode(false);
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
   };
 
   useEffect(() => {
     getUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleEditClick = () => setEditMode(!editMode);
+
+  const handleSaveClick = () => {
+    updateUser();
+  };
 
   if (!user) {
     return null;
@@ -50,7 +92,6 @@ const UserWidget = ({ userId, picturePath }) => {
 
   return (
     <WidgetWrapper>
-      {/* FIRST ROW */}
       <FlexBetween
         gap="0.5rem"
         pb="1.1rem"
@@ -70,25 +111,83 @@ const UserWidget = ({ userId, picturePath }) => {
                 },
               }}
             >
-              {firstName} {lastName}
+              {editMode ? (
+                <div>
+                  <input
+                    type="text"
+                    value={user.firstName}
+                    onChange={(e) =>
+                      setUser((prevUser) => ({
+                        ...prevUser,
+                        firstName: e.target.value,
+                      }))
+                    }
+                  />
+                  <input
+                    type="text"
+                    value={user.lastName}
+                    onChange={(e) =>
+                      setUser((prevUser) => ({
+                        ...prevUser,
+                        lastName: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              ) : (
+                `${firstName} ${lastName}`
+              )}
             </Typography>
             <Typography color={medium}>{friends.length} friends</Typography>
           </Box>
         </FlexBetween>
-        <ManageAccountsOutlined />
+        {editMode ? (
+          <SaveOutlined sx={{ color: main }} onClick={handleSaveClick} />
+        ) : (
+          <EditOutlined sx={{ color: main }} onClick={handleEditClick} />
+        )}
       </FlexBetween>
 
       <Divider />
 
-      {/* SECOND ROW */}
       <Box p="1rem 0">
         <Box display="flex" alignItems="center" gap="1rem" mb="0.5rem">
           <LocationOnOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{location}</Typography>
+          <Typography color={medium}>
+            {editMode ? (
+              <input
+                type="text"
+                value={user.location}
+                onChange={(e) =>
+                  setUser((prevUser) => ({
+                    ...prevUser,
+                    location: e.target.value,
+                  }))
+                }
+              />
+            ) : (
+              location
+            )}
+          </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap="1rem">
           <WorkOutlineOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{occupation}</Typography>
+          <Typography color={medium}>
+            {editMode ? (
+              <input
+                type="text"
+                value={user.occupation}
+                onChange={(e) =>
+                  setUser((prevUser) => ({
+                    ...prevUser,
+                    occupation: e.target.value,
+                  }))
+                }
+              />
+            ) : (
+              occupation
+            )}
+          </Typography>
         </Box>
       </Box>
 
