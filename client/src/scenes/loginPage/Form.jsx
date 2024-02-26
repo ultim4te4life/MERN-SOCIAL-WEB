@@ -56,7 +56,7 @@ const Form = () => {
   const isRegister = pageType === "register";
 
   const register = async (values, onSubmitProps) => {
-    // Perform registration logic
+    // this allows us to send form info with image
     const formData = new FormData();
     for (let value in values) {
       formData.append(value, values[value]);
@@ -74,12 +74,7 @@ const Form = () => {
     onSubmitProps.resetForm();
 
     if (savedUser) {
-      setFieldValue("email", values.email);
-      setFieldValue("password", values.password);
-
-      await login(values, onSubmitProps);
-
-      navigate("/home");
+      setPageType("login");
     }
   };
 
